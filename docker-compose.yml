@@ -43,7 +43,7 @@ services:
       - ./plugins/theme-check:/var/www/html/wp-content/plugins/theme-check
       - ./plugins/wordpress-importer:/var/www/html/wp-content/plugins/wordpress-importer
       - ./plugins/wp-bomb:/var/www/html/wp-content/plugins/wp-bomb
-      - ./origamiez:/var/www/html/wp-content/themes/origamiez
+      - ./theme-name:/var/www/html/wp-content/themes/theme-name
       - ./docker/config/override.ini:/usr/local/etc/php/conf.d/override.ini
     environment:
       WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
