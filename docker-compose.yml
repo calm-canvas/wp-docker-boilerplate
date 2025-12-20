@@ -14,18 +14,16 @@ services:
 
     ports:
       - "${WP_PORT}:80"
-    
+
     volumes:
       - wordpress_data:/var/www/html
       - ./docker/snapshot:/tmp/snapshot
-      - ./plugins/theme-check:/var/www/html/wp-content/plugins/theme-check
-      - ./plugins/wordpress-importer:/var/www/html/wp-content/plugins/wordpress-importer
       - ./plugins/wp-bomb:/var/www/html/wp-content/plugins/wp-bomb
       - ./theme-name:/var/www/html/wp-content/themes/theme-name
       - ./docker/config/override.ini:/usr/local/etc/php/conf.d/override.ini
     networks:
       - dev_tools
-    
+
     logging:
       driver: "json-file"
       options:
@@ -40,8 +38,6 @@ services:
     volumes:
       - wordpress_data:/var/www/html
       - ./docker/snapshot:/tmp/snapshot
-      - ./plugins/theme-check:/var/www/html/wp-content/plugins/theme-check
-      - ./plugins/wordpress-importer:/var/www/html/wp-content/plugins/wordpress-importer
       - ./plugins/wp-bomb:/var/www/html/wp-content/plugins/wp-bomb
       - ./theme-name:/var/www/html/wp-content/themes/theme-name
       - ./docker/config/override.ini:/usr/local/etc/php/conf.d/override.ini
@@ -54,7 +50,7 @@ services:
       - wordpress
     networks:
       - dev_tools
-    
+
     logging:
       driver: "json-file"
       options:

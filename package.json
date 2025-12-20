@@ -1,0 +1,18 @@
+{
+  "name": "origamiez",
+  "version": "1.0.0",
+  "description": "Enter description of your theme here.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "watch": "vite build --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "superfish": "^1.7.10",
+    "vite": "^5.0.0"
+  }
+}

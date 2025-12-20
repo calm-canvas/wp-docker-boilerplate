@@ -2,6 +2,7 @@ FROM wordpress:6.9.0-php8.1-apache
 
 RUN apt-get update && apt-get install -y \
     curl \
+    nano \
     git \
     && rm -rf /var/lib/apt/lists/*
 
