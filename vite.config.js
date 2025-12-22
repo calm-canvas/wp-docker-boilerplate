@@ -19,7 +19,7 @@ Object.keys(process.env).forEach((key) => {
   }
 });
 
-const themeName = process.env.THEME_NAME || "theme-name";
+const themeName = process.env.THEME_NAME || "pulse";
 
 export default defineConfig({
   plugins: [
@@ -53,8 +53,7 @@ export default defineConfig({
       output: {
         entryFileNames: "assets/js/[name].js",
         assetFileNames: (assetInfo) => {
-          const actualNames = assetInfo.names || [];
-          if (actualNames.some((name) => name.endsWith("style.css"))) {
+          if (assetInfo.name && assetInfo.name.endsWith(".css")) {
             return "style.css";
           }
         },
