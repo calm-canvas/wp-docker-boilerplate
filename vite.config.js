@@ -57,7 +57,6 @@ export default defineConfig({
           if (actualNames.some((name) => name.endsWith("style.css"))) {
             return "style.css";
           }
-          return "assets/[name].[ext]";
         },
       },
     },
