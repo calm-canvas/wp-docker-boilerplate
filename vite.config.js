@@ -19,7 +19,7 @@ Object.keys(process.env).forEach((key) => {
   }
 });
 
-const themeName = process.env.THEME_NAME || "theme-name";
+const themeName = process.env.THEME_NAME || "gom-show";
 
 export default defineConfig({
   plugins: [
@@ -57,7 +57,6 @@ export default defineConfig({
           if (actualNames.some((name) => name.endsWith("style.css"))) {
             return "style.css";
           }
-          return "assets/[name].[ext]";
         },
       },
     },
