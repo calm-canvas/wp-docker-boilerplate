@@ -19,7 +19,7 @@ Object.keys(process.env).forEach((key) => {
   }
 });
 
-const themeName = process.env.THEME_NAME || "pulse";
+const themeName = process.env.THEME_NAME || "theme-name";
 
 export default defineConfig({
   plugins: [

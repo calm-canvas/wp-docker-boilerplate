@@ -1,3 +1,0 @@
-[submodule "plugins/wp-bomb"]
-	path = plugins/wp-bomb
-	url = https://github.com/tranthethang/wp-bomb

@@ -1,0 +1,15 @@
+/*!
+ * Theme Name: THEME_NAME
+ * Theme URI: THEME_URI
+ * Author: THEME_AUTHOR
+ * Author URI: THEME_AUTHOR_URI
+ * Description: THEME_DESCRIPTION
+ * Version: THEME_VERSION
+ * License: GNU General Public License v3
+ * License URI: http://www.gnu.org/licenses/gpl-3.0.html
+ * Text Domain: THEME_TEXT_DOMAIN
+ * Requires at least: THEME_MIN_WP_VERSION
+ * Requires PHP: THEME_REQUIRE_PHP_VERSION
+ * Tested up to: THEME_TESTED_UP_TO
+ * Tags: THEME_TAGS
+ */
