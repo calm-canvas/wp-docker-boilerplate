@@ -1,6 +1,6 @@
 <?php
 /**
- * The main template file.
+ * Functions and definitions.
  *
  * @package theme-name
  */

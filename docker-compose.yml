@@ -1,82 +1,71 @@
+x-common:
+    logging: &common-logging
+        driver: 'json-file'
+        options:
+            max-size: '10m'
+            max-file: '3'
+    build-args: &common-build-args
+        WWWUSER: ${WWWUSER:-1000}
+        WWWGROUP: ${WWWGROUP:-1000}
+    volumes: &common-volumes
+        - wordpress_data:/var/www/html
+        - ./docker/snapshot:/tmp/snapshot
+        - ./theme-name:/var/www/html/wp-content/themes/theme-name
+        - ./docker/config/override.ini:/usr/local/etc/php/conf.d/override.ini
+    environment: &common-environment
+        TZ: ${TZ:-Asia/Ho_Chi_Minh}
+        WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+        WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+        WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+        WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+        WORDPRESS_CONFIG_EXTRA: |
+            define( 'DISABLE_WP_CRON', true );
+            define( 'WP_DEBUG_LOG', false );
+            define( 'WP_DEBUG_DISPLAY', false );
+            @ini_set( 'display_errors', 0 );
+            define('FS_METHOD', 'direct');
+            if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && $$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+                $$_SERVER['HTTPS'] = 'on';
+            }
+            if (isset($$_SERVER['HTTP_X_FORWARDED_HOST'])) {
+                $$_SERVER['HTTP_HOST'] = $$_SERVER['HTTP_X_FORWARDED_HOST'];
+            }
+            $$http_host = isset($$_SERVER['HTTP_HOST']) ? $$_SERVER['HTTP_HOST'] : 'localhost';
+            define( 'WP_HOME', (isset($$_SERVER['HTTPS']) ? 'https://' : 'http://') . $$http_host );
+            define( 'WP_SITEURL', (isset($$_SERVER['HTTPS']) ? 'https://' : 'http://') . $$http_host );
+
 services:
     wordpress:
         build:
             context: .
             dockerfile: docker/wordpress/Dockerfile
             args:
-                WWWUSER: ${WWWUSER:-1000}
-                WWWGROUP: ${WWWGROUP:-1000}
+                <<: *common-build-args
         restart: unless-stopped
         environment:
-            TZ: ${TZ:-Asia/Ho_Chi_Minh}
-            WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
-            WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
-            WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
-            WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+            <<: *common-environment
             WORDPRESS_DB_CHARSET: ${WORDPRESS_DB_CHARSET}
             WORDPRESS_DB_COLLATE: ${WORDPRESS_DB_COLLATE:-utf8mb4_unicode_ci}
             WORDPRESS_TABLE_PREFIX: ${WORDPRESS_TABLE_PREFIX}
-            WORDPRESS_CONFIG_EXTRA: |
-                define( 'DISABLE_WP_CRON', true );
-                define('FS_METHOD', 'direct');
-                if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && $$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-                    $$_SERVER['HTTPS'] = 'on';
-                }
-                if (isset($$_SERVER['HTTP_X_FORWARDED_HOST'])) {
-                    $$_SERVER['HTTP_HOST'] = $$_SERVER['HTTP_X_FORWARDED_HOST'];
-                }
-                $$http_host = isset($$_SERVER['HTTP_HOST']) ? $$_SERVER['HTTP_HOST'] : 'localhost';
-                define( 'WP_HOME', (isset($$_SERVER['HTTPS']) ? 'https://' : 'http://') . $$http_host );
-                define( 'WP_SITEURL', (isset($$_SERVER['HTTPS']) ? 'https://' : 'http://') . $$http_host );
-        volumes:
-            - wordpress_data:/var/www/html
-            - ./docker/snapshot:/tmp/snapshot
-            - ./theme-name:/var/www/html/wp-content/themes/theme-name
-            - ./docker/config/override.ini:/usr/local/etc/php/conf.d/override.ini
+        volumes: *common-volumes
         networks:
             - dev_tools
-
-        logging:
-            driver: 'json-file'
-            options:
-                max-size: '10m'
-                max-file: '3'
+        logging: *common-logging
 
     cli:
         build:
             context: .
             dockerfile: docker/cli/Dockerfile
             args:
-                WWWUSER: ${WWWUSER:-1000}
-                WWWGROUP: ${WWWGROUP:-1000}
+                <<: *common-build-args
         user: www-data
         command: tail -f /dev/null
         restart: unless-stopped
-        volumes:
-            - wordpress_data:/var/www/html
-            - ./docker/snapshot:/tmp/snapshot
-            - ./theme-name:/var/www/html/wp-content/themes/theme-name
-            - ./docker/config/override.ini:/usr/local/etc/php/conf.d/override.ini
+        volumes: *common-volumes
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         environment:
-            TZ: ${TZ:-Asia/Ho_Chi_Minh}
-            WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
-            WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
-            WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
-            WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
-            WORDPRESS_CONFIG_EXTRA: |
-                define( 'DISABLE_WP_CRON', true );
-                define('FS_METHOD', 'direct');
-                if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && $$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-                    $$_SERVER['HTTPS'] = 'on';
-                }
-                if (isset($$_SERVER['HTTP_X_FORWARDED_HOST'])) {
-                    $$_SERVER['HTTP_HOST'] = $$_SERVER['HTTP_X_FORWARDED_HOST'];
-                }
-                $$http_host = isset($$_SERVER['HTTP_HOST']) ? $$_SERVER['HTTP_HOST'] : 'localhost';
-                define( 'WP_HOME', (isset($$_SERVER['HTTPS']) ? 'https://' : 'http://') . $$http_host );
-                define( 'WP_SITEURL', (isset($$_SERVER['HTTPS']) ? 'https://' : 'http://') . $$http_host );
+            <<: *common-environment
         labels:
             ofelia.enabled: 'true'
             ofelia.job-exec.wp-cron-task.schedule: '@every 1m'
@@ -86,12 +75,7 @@ services:
             - wordpress
         networks:
             - dev_tools
-
-        logging:
-            driver: 'json-file'
-            options:
-                max-size: '10m'
-                max-file: '3'
+        logging: *common-logging
 
     scheduler:
         image: mcuadros/ofelia:latest

@@ -26,13 +26,6 @@ RUN apt-get update && apt-get install -y \
 # Copy Composer [cite: 1]
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Cấu hình Xdebug mặc định cho môi trường Dev
-RUN echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.client_port=9003" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.log=/tmp/xdebug.log" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # Ensure permissions on the home directory of www-data
