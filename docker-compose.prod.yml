@@ -1,0 +1,168 @@
+x-common:
+    logging: &common-logging
+        driver: 'json-file'
+        options:
+            max-size: '10m'
+            max-file: '3'
+    build-args: &common-build-args
+        WWWUSER: ${WWWUSER:-1000}
+        WWWGROUP: ${WWWGROUP:-1000}
+    volumes: &common-volumes
+        - wordpress_data:/var/www/html
+        - ./docker/snapshot:/tmp/snapshot
+        - ./theme-name:/var/www/html/wp-content/themes/theme-name
+        - ./docker/config/override.ini:/usr/local/etc/php/conf.d/override.ini
+    environment: &common-environment
+        TZ: ${TZ:-Asia/Ho_Chi_Minh}
+        WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+        WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+        WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+        WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+        WORDPRESS_CONFIG_EXTRA: |
+            define( 'DISABLE_WP_CRON', true );
+            define( 'WP_DEBUG_LOG', false );
+            define( 'WP_DEBUG_DISPLAY', false );
+            @ini_set( 'display_errors', 0 );
+            define('FS_METHOD', 'direct');
+            if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && $$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+                $$_SERVER['HTTPS'] = 'on';
+            }
+            if (isset($$_SERVER['HTTP_X_FORWARDED_HOST'])) {
+                $$_SERVER['HTTP_HOST'] = $$_SERVER['HTTP_X_FORWARDED_HOST'];
+            }
+            $$http_host = isset($$_SERVER['HTTP_HOST']) ? $$_SERVER['HTTP_HOST'] : 'localhost';
+            define( 'WP_HOME', (isset($$_SERVER['HTTPS']) ? 'https://' : 'http://') . $$http_host );
+            define( 'WP_SITEURL', (isset($$_SERVER['HTTPS']) ? 'https://' : 'http://') . $$http_host );
+
+services:
+    wordpress:
+        build:
+            context: .
+            dockerfile: docker/wordpress-fpm/Dockerfile
+            args:
+                <<: *common-build-args
+        restart: "${RESTART_POLICY:-unless-stopped}"
+        environment:
+            <<: *common-environment
+            WORDPRESS_DB_CHARSET: ${WORDPRESS_DB_CHARSET}
+            WORDPRESS_DB_COLLATE: ${WORDPRESS_DB_COLLATE:-utf8mb4_unicode_ci}
+            WORDPRESS_TABLE_PREFIX: ${WORDPRESS_TABLE_PREFIX}
+        volumes: *common-volumes
+        networks:
+            - theme-name-net
+        logging: *common-logging
+
+    cli:
+        build:
+            context: .
+            dockerfile: docker/cli/Dockerfile
+            args:
+                <<: *common-build-args
+        user: www-data
+        command: tail -f /dev/null
+        restart: "${RESTART_POLICY:-unless-stopped}"
+        volumes: *common-volumes
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        environment:
+            <<: *common-environment
+        labels:
+            ofelia.enabled: 'true'
+            ofelia.job-exec.wp-cron-task.schedule: '@every 1m'
+            ofelia.job-exec.wp-cron-task.command: 'wp cron event run --due-now'
+            ofelia.job-exec.wp-cron-task.user: 'www-data'
+        depends_on:
+            - wordpress
+        networks:
+            - theme-name-net
+        logging: *common-logging
+
+    scheduler:
+        image: mcuadros/ofelia:latest
+        restart: "${RESTART_POLICY:-unless-stopped}"
+        depends_on:
+            - cli
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        command: daemon --docker
+
+    nginx:
+        image: nginx:stable-alpine
+        restart: "${RESTART_POLICY:-unless-stopped}"
+        ports:
+            - '${WP_PORT}:80'
+            - '${WP_PORT_SSL}:443'
+        volumes:
+            - ./docker/nginx/prod.conf:/etc/nginx/conf.d/default.conf
+            - ./docker/nginx/certs:/etc/nginx/certs
+        depends_on:
+            - wordpress
+        networks:
+            - theme-name-net
+
+    redis:
+        profiles: ["tools"]
+        image: "redis:7.4-alpine"
+        restart: "${RESTART_POLICY:-unless-stopped}"
+        deploy:
+            resources:
+                limits:
+                    cpus: "${REDIS_CPUS_LIMIT:-0.5}"
+                    memory: "${REDIS_MEMORY_LIMIT:-512M}"
+                reservations:
+                    cpus: "${REDIS_CPUS_RESERVED:-0.25}"
+                    memory: "${REDIS_MEMORY_RESERVED:-256M}"
+        command: redis-server /etc/redis/redis.conf --requirepass ${REDIS_PASSWORD:-password102}
+        ports:
+            - "${REDIS_PORT:-6379}:6379"
+        networks:
+            - theme-name-net
+        volumes:
+            - redis_data:/data
+            - ./redis/redis.conf:/etc/redis/redis.conf:ro
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    mariadb:
+        profiles: ["tools"]
+        container_name: mariadb
+        image: "mariadb:11.4.5"
+        restart: "${RESTART_POLICY:-unless-stopped}"
+        command: mariadbd --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+        deploy:
+            resources:
+                limits:
+                    cpus: "${MARIADB_CPUS_LIMIT:-1}"
+                    memory: "${MARIADB_MEMORY_LIMIT:-1G}"
+                reservations:
+                    cpus: "${MARIADB_CPUS_RESERVED:-0.5}"
+                    memory: "${MARIADB_MEMORY_RESERVED:-512M}"
+        environment:
+            MARIADB_DATABASE: "${MARIADB_DATABASE:-app}"
+            MARIADB_USER: "${MARIADB_USER:-appuser}"
+            MARIADB_PASSWORD: "${MARIADB_PASSWORD:-password102}"
+            MARIADB_ROOT_PASSWORD: "${MARIADB_ROOT_PASSWORD:-password102}"
+            TZ: "${TZ:-Asia/Ho_Chi_Minh}"
+        ports:
+            - "${MARIADB_PORT:-3306}:3306"
+        networks:
+            - theme-name-net
+        volumes:
+            - mariadb_data:/var/lib/mysql
+        healthcheck:
+            test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-p$${MARIADB_ROOT_PASSWORD}"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+networks:
+    theme-name-net:
+        driver: bridge
+
+volumes:
+    wordpress_data:
+    redis_data:
+    mariadb_data:

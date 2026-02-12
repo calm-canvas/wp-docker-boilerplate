@@ -1,6 +1,6 @@
 FROM wordpress:6.9.0-php8.3-apache
 
-# Giữ nguyên logic ARG và RUN để map UID/GID của bạn [cite: 1-9]
+# Keep ARG and RUN logic to map your UID/GID
 ARG WWWUSER=1000
 ARG WWWGROUP=1000
 

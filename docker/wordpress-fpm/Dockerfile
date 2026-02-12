@@ -1,6 +1,6 @@
 FROM wordpress:6.9.0-fpm-alpine
 
-# Cài đặt các extension cần thiết cho WordPress & Cache
+# Install necessary extensions for WordPress & Cache
 RUN apk add --no-cache \
     libpng-dev \
     libjpeg-turbo-dev \
@@ -26,32 +26,22 @@ RUN apk add --no-cache \
     && docker-php-ext-enable redis \
     && apk del $PHPIZE_DEPS
 
-# Cấu hình OPcache và PHP tối ưu cho Production
-RUN { \
-    echo 'opcache.memory_consumption=128'; \
-    echo 'opcache.interned_strings_buffer=8'; \
-    echo 'opcache.max_accelerated_files=10000'; \
-    echo 'opcache.revalidate_freq=60'; \
-    echo 'opcache.fast_shutdown=1'; \
-    echo 'opcache.enable_cli=1'; \
-    } > /usr/local/etc/php/conf.d/opcache-recommended.ini \
-    && { \
-    echo 'upload_max_filesize=64M'; \
-    echo 'post_max_size=64M'; \
-    echo 'memory_limit=256M'; \
-    echo 'max_execution_time=300'; \
-    echo 'date.timezone=UTC'; \
-    echo 'display_errors=Off'; \
-    echo 'log_errors=On'; \
-    } > /usr/local/etc/php/conf.d/wp-production.ini
-
 ARG WWWUSER=1000
 ARG WWWGROUP=1000
 
-RUN usermod -u ${WWWUSER} www-data && \
-    groupmod -g ${WWWGROUP} www-data && \
+RUN if [ ${WWWUSER} -ne 82 ]; then \
+        EXISTING_USER=$(getent passwd ${WWWUSER} | cut -d: -f1); \
+        if [ ! -z "$EXISTING_USER" ]; then userdel -f $EXISTING_USER; fi; \
+        usermod -u ${WWWUSER} www-data; \
+    fi && \
+    if [ ${WWWGROUP} -ne 82 ]; then \
+        EXISTING_GROUP=$(getent group ${WWWGROUP} | cut -d: -f1); \
+        if [ ! -z "$EXISTING_GROUP" ]; then groupdel $EXISTING_GROUP; fi; \
+        groupmod -g ${WWWGROUP} www-data; \
+    fi && \
     apk del shadow
 
 WORKDIR /var/www/html
 
-RUN chown -R www-data:www-data /var/www/html
+# Ensure permissions on the home directory of www-data
+RUN chown -R www-data:www-data /var/www
