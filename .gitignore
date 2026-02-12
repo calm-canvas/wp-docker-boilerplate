@@ -19,3 +19,4 @@ Thumbs.db
 .zencoder/
 .zenflow/
 .husky
+docker/config/override.ini
