@@ -73,17 +73,23 @@ export default defineConfig({
 			},
 			output: {
 				entryFileNames: '[name].js',
-				chunkFileNames: 'chunks/[name]-[hash].js',
+				chunkFileNames: (chunkInfo) => {
+					if (chunkInfo.name === 'vendor') {
+						return '[name].js';
+					}
+					return 'chunks/[name]-[hash].js';
+				},
 				assetFileNames: (assetInfo) => {
-					if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+					if (
+						assetInfo.names &&
+						assetInfo.names.some((name) => name.endsWith('.css'))
+					) {
 						return '[name].css';
 					}
 					return '[name]-[hash][extname]';
 				},
 				manualChunks: {
-					'vendor-react': ['react', 'react-dom'],
-					'vendor-swiper': ['swiper'],
-					'vendor-utils': ['lucide-react'],
+					vendor: ['react', 'react-dom', 'swiper', 'lucide-react'],
 				},
 			},
 		},
