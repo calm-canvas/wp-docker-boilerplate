@@ -23,6 +23,8 @@ def replace_theme_name_in_files(root_dir, old_name, new_name):
         print("Error: New theme name is not set. Aborting.")
         return
 
+    current_script_path = os.path.abspath(__file__)
+
     for subdir, _, files in os.walk(root_dir):
         # Exclude .git, node_modules, and vendor directories
         excluded_parts = {'.git', 'node_modules', 'vendor'}
@@ -31,6 +33,11 @@ def replace_theme_name_in_files(root_dir, old_name, new_name):
 
         for filename in files:
             file_path = os.path.join(subdir, filename)
+            
+            # Skip the current script to avoid replacing keywords within itself
+            if os.path.abspath(file_path) == current_script_path:
+                continue
+
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     file_content = f.read()

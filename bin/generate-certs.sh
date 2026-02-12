@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Check if mkcert is installed
-if ! command -v mkcert &> /dev/null
+if ! command -v mkcert &> /dev/null && ! command -v mkcert.exe &> /dev/null
 then
     echo "mkcert could not be found. Attempting to install..."
     ./bin/setup-mkcert.sh
@@ -14,7 +14,12 @@ fi
 CERT_DIR="docker/nginx/certs"
 mkdir -p "$CERT_DIR"
 
-CURRENT_IP=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | awk '{print $2}' | sed 's/addr://' | head -n 1)
+# Improved IP detection using Python (reliable across macOS, Linux, and Windows)
+CURRENT_IP=$(python3 -c "import socket; s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); s.connect(('8.8.8.8', 80)); print(s.getsockname()[0]); s.close()" 2>/dev/null || \
+             python -c "import socket; s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); s.connect(('8.8.8.8', 80)); print(s.getsockname()[0]); s.close()" 2>/dev/null || \
+             echo "127.0.0.1")
+
+echo "Detected IP: $CURRENT_IP"
 
 # Generate certificates
 # You can add your local domains here, e.g., localhost 127.0.0.1
