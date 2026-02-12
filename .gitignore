@@ -16,3 +16,6 @@ theme-name/dist/
 ehthumbs.db
 Thumbs.db
 *.po~
+.zencoder/
+.zenflow/
+.husky
