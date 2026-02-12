@@ -7,8 +7,8 @@ This document provides instructions for developing WordPress themes and plugins 
 - **`theme-name/`**: This is the primary directory for theme development. It is mapped to `/var/www/html/wp-content/themes/theme-name` inside the Docker containers.
 - **`plugins/`**: This directory is for plugin development. For example, the `wp-bomb` plugin resides in `plugins/wp-bomb`. Any new plugin should have its own subdirectory here and be mapped in `docker-compose.yml`.
 - **`assets/`**: This directory contains the raw, uncompiled frontend assets (TypeScript and Sass).
-  - **`assets/ts/`**: TypeScript files. The main entry point is `script.ts`.
-  - **`assets/sass/`**: Sass files. The main entry point is `style.sass`.
+    - **`assets/ts/`**: TypeScript files. The main entry point is `script.ts`.
+    - **`assets/sass/`**: Sass files. The main entry point is `style.sass`.
 - **`docker-compose.yml`**: Defines the Docker services, including the WordPress container, a WP-CLI container, and volume mappings.
 - **`vite.config.js`**: Configuration file for Vite, the frontend build tool.
 - **`composer.json`**: PHP dependency management and scripting for code quality tools.
@@ -37,29 +37,29 @@ This document provides instructions for developing WordPress themes and plugins 
 
 This project uses Vite to compile TypeScript and Sass.
 
--   **Source files**:
-    -   TypeScript: `assets/ts/script.ts`
-    -   Sass: `assets/sass/style.sass`
--   **Output files**:
-    -   JavaScript: `theme-name/assets/js/script.js`
-    -   CSS: `theme-name/style.css`
+- **Source files**:
+    - TypeScript: `assets/ts/script.ts`
+    - Sass: `assets/sass/style.sass`
+- **Output files**:
+    - JavaScript: `theme-name/assets/js/script.js`
+    - CSS: `theme-name/style.css`
 
 ### Frontend Workflow
 
--   **Development**: Run `npm run dev` to start the Vite development server. This will watch for changes in the `assets` directory and automatically recompile your assets. It also provides hot module replacement for a smoother development experience.
--   **Production Build**: Run `npm run build` to create optimized, production-ready assets.
--   **Watch for Changes**: Run `npm run watch` to automatically rebuild assets whenever a file in the `assets` directory is changed.
+- **Development**: Run `npm run dev` to start the Vite development server. This will watch for changes in the `assets` directory and automatically recompile your assets. It also provides hot module replacement for a smoother development experience.
+- **Production Build**: Run `npm run build` to create optimized, production-ready assets.
+- **Watch for Changes**: Run `npm run watch` to automatically rebuild assets whenever a file in the `assets` directory is changed.
 
 ## WP-CLI
 
 A WP-CLI container is included for running WordPress commands from the command line.
 
--   **Usage**: `docker-compose exec cli wp <command>`
--   **Example**: `docker-compose exec cli wp plugin list`
+- **Usage**: `docker-compose exec cli wp <command>`
+- **Example**: `docker-compose exec cli wp plugin list`
 
 ## PHP Code Quality
 
 This project uses PHP_CodeSniffer with WordPress Coding Standards.
 
--   **Check Code**: `composer format`
--   **Fix Code**: `composer fix`
+- **Check Code**: `composer format`
+- **Fix Code**: `composer fix`

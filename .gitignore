@@ -1,15 +1,12 @@
 node_modules/
 .idea/
-.vscode/
-.zencoder/
 plugins/*
-!plugins/wp-bomb
-!plugins/theme-check
-!plugins/wordpress-importer
-!plugins/regenerate-thumbnails
-origamiez/vendor/
+vendor/
+docker/nginx/certs/
 /.env
 /.env.local
+/.env.prod
+theme-name/dist/
 # OS generated files
 .DS_Store
 .DS_Store?
