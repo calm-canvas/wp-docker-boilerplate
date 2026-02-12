@@ -1,9 +1,11 @@
 FROM wordpress:6.9.0-php8.3-apache
 
-# Keep ARG and RUN logic to map your UID/GID
+# Environment settings
 ARG WWWUSER=1000
 ARG WWWGROUP=1000
+ARG TZ=Asia/Ho_Chi_Minh
 
+# Map UID/GID and install dependencies
 RUN if [ ${WWWUSER} -ne 33 ]; then \
         EXISTING_USER=$(getent passwd ${WWWUSER} | cut -d: -f1); \
         if [ ! -z "$EXISTING_USER" ]; then userdel -f $EXISTING_USER; fi; \
@@ -13,17 +15,17 @@ RUN if [ ${WWWUSER} -ne 33 ]; then \
         EXISTING_GROUP=$(getent group ${WWWGROUP} | cut -d: -f1); \
         if [ ! -z "$EXISTING_GROUP" ]; then groupdel $EXISTING_GROUP; fi; \
         groupmod -g ${WWWGROUP} www-data; \
-    fi
-
-RUN apt-get update && apt-get install -y \
-    curl nano git tzdata \
+    fi && \
+    apt-get update && apt-get install -y \
+    curl nano git tzdata zip unzip \
     $PHPIZE_DEPS \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
-    && ln -snf /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime && echo Asia/Ho_Chi_Minh > /etc/timezone \
-    && rm -rf /var/lib/apt/lists/*
+    && ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone \
+    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+    && rm -rf /var/lib/apt/lists/* /tmp/pear
 
-# Copy Composer [cite: 1]
+# Copy Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 ENV COMPOSER_ALLOW_SUPERUSER=1

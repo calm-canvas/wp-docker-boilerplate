@@ -2,10 +2,10 @@ FROM wordpress:cli-php8.3
 
 ARG WWWUSER=1000
 ARG WWWGROUP=1000
+ARG TZ=Asia/Ho_Chi_Minh
 
 USER root
 
-# Alpine uses 'shadow' package for usermod/groupmod, or we can use 'sed'/'apk'
 RUN apk add --no-cache shadow tzdata && \
     if [ ${WWWUSER} -ne 82 ]; then \
         EXISTING_USER=$(getent passwd ${WWWUSER} | cut -d: -f1); \
@@ -17,8 +17,8 @@ RUN apk add --no-cache shadow tzdata && \
         if [ ! -z "$EXISTING_GROUP" ]; then groupdel $EXISTING_GROUP; fi; \
         groupmod -g ${WWWGROUP} www-data; \
     fi && \
-    cp /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime && \
-    echo "Asia/Ho_Chi_Minh" > /etc/timezone && \
+    cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
+    echo "${TZ}" > /etc/timezone && \
     apk del shadow
 
 USER www-data

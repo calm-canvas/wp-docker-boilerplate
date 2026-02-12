@@ -1,5 +1,10 @@
 FROM wordpress:6.9.0-fpm-alpine
 
+# Environment settings
+ARG WWWUSER=1000
+ARG WWWGROUP=1000
+ARG TZ=Asia/Ho_Chi_Minh
+
 # Install necessary extensions for WordPress & Cache
 RUN apk add --no-cache \
     libpng-dev \
@@ -9,6 +14,7 @@ RUN apk add --no-cache \
     icu-dev \
     libxml2-dev \
     oniguruma-dev \
+    tzdata \
     shadow \
     $PHPIZE_DEPS \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -24,22 +30,19 @@ RUN apk add --no-cache \
         soap \
     && pecl install redis \
     && docker-php-ext-enable redis \
-    && apk del $PHPIZE_DEPS
-
-ARG WWWUSER=1000
-ARG WWWGROUP=1000
-
-RUN if [ ${WWWUSER} -ne 82 ]; then \
+    && if [ ${WWWUSER} -ne 82 ]; then \
         EXISTING_USER=$(getent passwd ${WWWUSER} | cut -d: -f1); \
         if [ ! -z "$EXISTING_USER" ]; then userdel -f $EXISTING_USER; fi; \
         usermod -u ${WWWUSER} www-data; \
-    fi && \
-    if [ ${WWWGROUP} -ne 82 ]; then \
+    fi \
+    && if [ ${WWWGROUP} -ne 82 ]; then \
         EXISTING_GROUP=$(getent group ${WWWGROUP} | cut -d: -f1); \
         if [ ! -z "$EXISTING_GROUP" ]; then groupdel $EXISTING_GROUP; fi; \
         groupmod -g ${WWWGROUP} www-data; \
-    fi && \
-    apk del shadow
+    fi \
+    && cp /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone \
+    && apk del shadow $PHPIZE_DEPS \
+    && rm -rf /tmp/pear
 
 WORKDIR /var/www/html
 
