@@ -49,7 +49,7 @@ services:
             WORDPRESS_TABLE_PREFIX: ${WORDPRESS_TABLE_PREFIX}
         volumes: *common-volumes
         networks:
-            - theme-name-net
+            - dev_tools
         logging: *common-logging
 
     cli:
@@ -74,7 +74,7 @@ services:
         depends_on:
             - wordpress
         networks:
-            - theme-name-net
+            - dev_tools
         logging: *common-logging
 
     scheduler:
@@ -98,7 +98,7 @@ services:
         depends_on:
             - wordpress
         networks:
-            - theme-name-net
+            - dev_tools
 
     redis:
         profiles: ["tools"]
@@ -116,7 +116,7 @@ services:
         ports:
             - "${REDIS_PORT:-6379}:6379"
         networks:
-            - theme-name-net
+            - dev_tools
         volumes:
             - redis_data:/data
             - ./redis/redis.conf:/etc/redis/redis.conf:ro
@@ -149,7 +149,7 @@ services:
         ports:
             - "${MARIADB_PORT:-3306}:3306"
         networks:
-            - theme-name-net
+            - dev_tools
         volumes:
             - mariadb_data:/var/lib/mysql
         healthcheck:
@@ -159,8 +159,8 @@ services:
             retries: 5
 
 networks:
-    theme-name-net:
-        driver: bridge
+    dev_tools:
+        external: true
 
 volumes:
     wordpress_data:

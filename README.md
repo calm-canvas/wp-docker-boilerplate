@@ -1,45 +1,40 @@
-# wp-docker-boilerplate
+# WordPress Docker Boilerplate
 
-## Getting Started
+A comprehensive WordPress development boilerplate designed for modern local development. It integrates a Docker-based environment, a custom theme with a Vite-powered frontend build system (supporting TypeScript, Sass, and React), and automated setup scripts.
 
-Follow these steps to set up your new WordPress project.
+## Quick Start
 
-### 1. Environment Configuration
+1. **Environment Configuration**: 
+   ```bash
+   cp .env.example .env
+   ```
+2. **Theme Initialization**:
+   ```bash
+   python3 bin/python/rename_theme.py
+   ```
+3. **Install Dependencies**:
+   ```bash
+   make install
+   ```
+4. **Start the Project**:
+   ```bash
+   make up
+   ```
 
-First, you need to create your local environment configuration file. Copy the example file:
+## Detailed Documentation
 
-```bash
-cp .env.example .env
-```
+For more specific instructions, please refer to:
 
-Next, open the `.env` file and customize the configuration values for your project. At a minimum, you should set your desired theme name:
+- [**Setup Guide**](./SETUP.md): Detailed steps for environment setup, database configuration, SSL, and initialization.
+- [**Development Guide**](./DEVELOP.md): Information on code structure, frontend workflow, and quality standards.
 
-```dotenv
-THEME_NAME=my-awesome-theme
-```
+## Project Structure
 
-### 2. Theme Initialization
+- `assets/`: Source frontend files (TypeScript/React, Sass).
+- `theme-name/`: The primary WordPress theme (renameable).
+- `docker/`: Dockerfiles and service configurations.
+- `bin/`: Utility scripts for automation.
 
-Once you have configured your `THEME_NAME` in the `.env` file, run the theme initialization script. This will rename the `theme-name` directory and update all placeholder references throughout the project.
+## Shared Services
 
-From the project root directory, run:
-
-```bash
-python3 bin/python/rename_theme.py
-```
-
-### 3. Shared Services (Database)
-
-This project's `docker-compose.yml` does not include a database service. It is designed to connect to a shared MariaDB service.
-
-Before starting this project, you must first set up the shared services by following the instructions at this repository: [https://github.com/tranthethang/docker-shared-services](https://github.com/tranthethang/docker-shared-services)
-
-This will install and run MariaDB and other shared containers needed by this project.
-
-### 4. Start the Project
-
-Once the shared services are running and the project is set up, you can start it using Docker:
-
-```bash
-docker-compose up -d
-```
+This project is designed to connect to a shared MariaDB service. Ensure you have the [Shared Services](https://github.com/tranthethang/docker-shared-services) running before starting.

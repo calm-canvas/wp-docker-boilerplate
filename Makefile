@@ -1,4 +1,4 @@
-.PHONY: help up down restart stop logs ps init rename mkcert install dev build lint-js fix-js lint-php fix-php backup clear-cache fix-line theme-info
+.PHONY: help up down restart stop logs ps init rename setup-mkcert generate-certs install dev build lint-js fix-js lint-php fix-php backup clear-cache fix-line theme-info
 
 help:
 	@echo "Available commands:"
@@ -13,7 +13,8 @@ help:
 	@echo "  Setup:"
 	@echo "    init           - Run initial setup script"
 	@echo "    rename         - Rename the theme"
-	@echo "    mkcert         - Setup SSL certificates"
+	@echo "    setup-mkcert   - Install mkcert and setup local CA"
+	@echo "    generate-certs - Generate SSL certificates"
 	@echo "    install        - Install all dependencies (pnpm & composer)"
 	@echo ""
 	@echo "  Frontend (Node):"
@@ -58,8 +59,11 @@ init:
 rename:
 	python3 bin/python/rename_theme.py
 
-mkcert:
+setup-mkcert:
 	sh bin/setup-mkcert.sh
+
+generate-certs:
+	sh bin/generate-certs.sh
 
 install:
 	pnpm install
